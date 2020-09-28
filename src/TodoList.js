@@ -28,9 +28,47 @@ const filteredTodoListState = selector({
     },
 });
 
+const todoListStatsState = selector({
+    key: 'todoListStatsState',
+    get: ({ get }) => {
+        const todoList = get(todoListState)
+        const total = todoList.length
+        const completedNum = todoList.filter((item) => item.isComplete).length;
+        const uncompletedNum = total - completedNum;
+        const percentCompleted = total === 0 ? 0 : completedNum / total;
+
+        return {
+            total,
+            completedNum,
+            uncompletedNum,
+            percentCompleted,
+        };
+    },
+})
+
 let id = 0;
 
-const getId = () => id ++
+const getId = () => id++
+
+function TodoListStats() {
+    const {
+        total,
+        completedNum,
+        uncompletedNum,
+        percentCompleted,
+    } = useRecoilValue(todoListStatsState);
+
+    const formattedPercentCompleted = Math.round(percentCompleted * 100);
+
+    return (
+        <ul>
+            <li>Total items: {total}</li>
+            <li>Items completed: {completedNum}</li>
+            <li>Items not completed: {uncompletedNum}</li>
+            <li>Percent completed: {formattedPercentCompleted}</li>
+        </ul>
+    );
+}
 
 function Creator() {
     const [inputValue, setInputValue] = useState('')
@@ -131,6 +169,7 @@ export default function TodoList() {
     const todoList = useRecoilValue(filteredTodoListState)
     return (
         <>
+            <TodoListStats />
             <Creator />
             <TodoListFilters />
             {todoList.map((todoItem) => (
